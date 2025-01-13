@@ -1,4 +1,4 @@
-package org.ms.facture_service.client;
+package org.ms.facture_service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProductService, Product } from '../services/product.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-product-form',
@@ -16,7 +17,7 @@ import { ProductService, Product } from '../services/product.service';
             <mat-form-field appearance="outline">
               <mat-label>Name</mat-label>
               <input matInput formControlName="name" placeholder="Product name">
-              <mat-error *ngIf="productForm.get('name')?.hasError('required')">
+              <mat-error *ngIf="productForm.get('name')?.errors?.['required']">
                 Name is required
               </mat-error>
             </mat-form-field>
@@ -24,10 +25,10 @@ import { ProductService, Product } from '../services/product.service';
             <mat-form-field appearance="outline">
               <mat-label>Price</mat-label>
               <input matInput type="number" formControlName="price" placeholder="Product price">
-              <mat-error *ngIf="productForm.get('price')?.hasError('required')">
+              <mat-error *ngIf="productForm.get('price')?.errors?.['required']">
                 Price is required
               </mat-error>
-              <mat-error *ngIf="productForm.get('price')?.hasError('min')">
+              <mat-error *ngIf="productForm.get('price')?.errors?.['min']">
                 Price must be greater than 0
               </mat-error>
             </mat-form-field>
@@ -35,17 +36,17 @@ import { ProductService, Product } from '../services/product.service';
             <mat-form-field appearance="outline">
               <mat-label>Quantity</mat-label>
               <input matInput type="number" formControlName="quantity" placeholder="Product quantity">
-              <mat-error *ngIf="productForm.get('quantity')?.hasError('required')">
+              <mat-error *ngIf="productForm.get('quantity')?.errors?.['required']">
                 Quantity is required
               </mat-error>
-              <mat-error *ngIf="productForm.get('quantity')?.hasError('min')">
+              <mat-error *ngIf="productForm.get('quantity')?.errors?.['min']">
                 Quantity must be greater than or equal to 0
               </mat-error>
             </mat-form-field>
 
             <div class="form-actions">
               <button mat-button type="button" routerLink="/products">Cancel</button>
-              <button mat-raised-button color="primary" type="submit" [disabled]="productForm.invalid">
+              <button mat-raised-button color="primary" type="submit" [disabled]="!productForm.valid">
                 {{isEditMode ? 'Update' : 'Create'}}
               </button>
             </div>
@@ -91,17 +92,30 @@ import { ProductService, Product } from '../services/product.service';
   `]
 })
 export class ProductFormComponent implements OnInit {
-  productForm: FormGroup;
+  productForm!: FormGroup;
   isEditMode = false;
-  productId?: number;
+  productId: number | null = null;
 
   constructor(
     private fb: FormBuilder,
     private productService: ProductService,
-    private route: ActivatedRoute,
+    private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private snackBar: MatSnackBar
   ) {
+    // Check if user is admin
+    const userInfo = this.authService.getUserInfo();
+    if (!userInfo?.roles?.includes('ROLE_ADMIN')) {
+      this.snackBar.open('You do not have permission to access this page', 'Close', {
+        duration: 3000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top'
+      });
+      this.router.navigate(['/products']);
+      return;
+    }
+
     this.productForm = this.fb.group({
       name: ['', Validators.required],
       price: ['', [Validators.required, Validators.min(0)]],

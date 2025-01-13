@@ -1,8 +1,8 @@
 package org.ms.facture_service.service;
 
 import lombok.RequiredArgsConstructor;
-import org.ms.facture_service.client.ProductServiceClient;
 import org.ms.facture_service.dto.ProductDTO;
+import org.ms.facture_service.client.ProductServiceClient;
 import org.springframework.stereotype.Service;
 
 @Service

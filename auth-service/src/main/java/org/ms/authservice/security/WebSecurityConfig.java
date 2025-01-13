@@ -33,10 +33,8 @@ public class WebSecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
-
         return authProvider;
     }
 
@@ -56,21 +54,9 @@ public class WebSecurityConfig {
             .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> 
-                auth.requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/test/all").permitAll()
-                    .requestMatchers("/api/test/user").hasAnyAuthority("product:read", "invoice:read")
-                    .requestMatchers("/api/test/admin").hasRole("ADMIN")
-                    .requestMatchers("/actuator/**").permitAll() // For service discovery
-                    // Product endpoints
-                    .requestMatchers(HttpMethod.GET, "/api/products/**").hasAuthority("product:read")
-                    .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("product:create")
-                    .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("product:update")
-                    .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("product:delete")
-                    // Invoice endpoints
-                    .requestMatchers(HttpMethod.GET, "/api/invoices/**").hasAuthority("invoice:read")
-                    .requestMatchers(HttpMethod.POST, "/api/invoices/**").hasAuthority("invoice:create")
-                    .requestMatchers(HttpMethod.PUT, "/api/invoices/**").hasAuthority("invoice:update")
-                    .requestMatchers(HttpMethod.DELETE, "/api/invoices/**").hasAuthority("invoice:delete")
+                auth.requestMatchers("/api/auth/signin", "/api/auth/signup").permitAll()
+                    .requestMatchers("/actuator/**").permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated()
             );
 

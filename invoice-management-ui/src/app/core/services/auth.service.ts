@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 interface LoginResponse {
   token: string;
   type: string;
+  id: number;
   username: string;
+  email: string;
   roles: string[];
 }
 
@@ -21,7 +23,7 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(username: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/signin`, {
+    return this.http.post<LoginResponse>(`${environment.auth.loginUrl}`, {
       username,
       password
     }).pipe(
@@ -34,10 +36,11 @@ export class AuthService {
   }
 
   register(username: string, email: string, password: string): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/auth/signup`, {
+    return this.http.post(`${environment.auth.registerUrl}`, {
       username,
       email,
-      password
+      password,
+      roles: ['user']
     });
   }
 
@@ -55,12 +58,17 @@ export class AuthService {
     return !!this.getToken();
   }
 
+  getAuthState(): Observable<boolean> {
+    return this.authStateSubject.asObservable();
+  }
+
   getUserInfo(): any {
     const userStr = localStorage.getItem(this.USER_KEY);
     return userStr ? JSON.parse(userStr) : null;
   }
 
-  getAuthState(): Observable<boolean> {
-    return this.authStateSubject.asObservable();
+  getAuthorizationHeaders(): HttpHeaders {
+    const token = this.getToken();
+    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 }

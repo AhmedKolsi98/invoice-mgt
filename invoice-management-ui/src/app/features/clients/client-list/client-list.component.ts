@@ -34,13 +34,43 @@ export class ClientListComponent implements OnInit {
         this.dataSource.sort = this.sort;
       },
       error: (error) => {
-        this.snackBar.open('Error loading clients', 'Close', { duration: 3000 });
+        this.snackBar.open('Error loading clients', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
       }
     });
+  }
+
+  deleteClient(id: number) {
+    if (confirm('Are you sure you want to delete this client?')) {
+      this.clientService.deleteClient(id).subscribe({
+        next: () => {
+          this.loadClients();
+          this.snackBar.open('Client deleted successfully', 'Close', {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top'
+          });
+        },
+        error: (error) => {
+          this.snackBar.open('Error deleting client', 'Close', {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top'
+          });
+        }
+      });
+    }
   }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 }
