@@ -38,6 +38,10 @@ import { Router } from '@angular/router';
         </div>
       </mat-sidenav-content>
     </mat-sidenav-container>
+    <a mat-list-item routerLink="/clients">
+  <mat-icon>people</mat-icon>
+  <span>Clients</span>
+</a>
   `,
   styles: [`
     .sidenav-container {
